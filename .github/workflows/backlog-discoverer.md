@@ -23,6 +23,9 @@ timeout-minutes: 10
 
 permissions: read-all
 
+checkout:
+  fetch-depth: 0
+
 network:
   allowed:
     - defaults
@@ -50,6 +53,16 @@ safe-outputs:
   dispatch-workflow:
     workflows: [backlog-discoverer-reviewer]
     max: 1
+  create-pull-request:
+    draft: true
+    preserve-branch-name: true
+    recreate-ref: true
+    auto-close-issue: true
+    base-branch: main
+    protected-files:
+      policy: blocked
+      exclude:
+        - .skraft/
 ---
 
 # Backlog-Discoverer Agent
