@@ -79,6 +79,6 @@ After rendering your structured verdict:
 
 | Verdict | Action |
 |---------|--------|
-| **APPROVED** | Dispatch `software-engineer` with `issue_number` + `story_type` + `iteration: 1` |
-| **RETRY** (minor issues) | Dispatch `acceptance-designer` with `issue_number` + `story_type` + `iteration` |
+| **APPROVED** | Dispatch `software-engineer` with `issue_number` + `story_type` + `iteration: 1` + `working_branch` |
+| **RETRY** (minor issues) | Dispatch `acceptance-designer` with `issue_number` + `story_type` + `iteration` + `working_branch` |
 | **BLOCKED** (major blocker) | Add `state:blocked`. Do NOT dispatch. |

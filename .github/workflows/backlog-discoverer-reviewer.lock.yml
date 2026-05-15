@@ -497,10 +497,15 @@ jobs:
                         "default": "functional",
                         "description": "functional or technical (detected by backlog-discoverer).",
                         "type": "string"
+                      },
+                      "working_branch": {
+                        "description": "Branch sdlc/{N}-{slug} for this issue.",
+                        "type": "string"
                       }
                     },
                     "required": [
-                      "issue_number"
+                      "issue_number",
+                      "working_branch"
                     ],
                     "type": "object"
                   },

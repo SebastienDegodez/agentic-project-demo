@@ -512,10 +512,15 @@ jobs:
                         "default": "functional",
                         "description": "functional or technical (propagated from discoverer).",
                         "type": "string"
+                      },
+                      "working_branch": {
+                        "description": "Branch sdlc/{N}-{slug} created by backlog-discoverer.",
+                        "type": "string"
                       }
                     },
                     "required": [
-                      "issue_number"
+                      "issue_number",
+                      "working_branch"
                     ],
                     "type": "object"
                   },

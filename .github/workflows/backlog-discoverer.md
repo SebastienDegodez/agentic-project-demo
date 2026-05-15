@@ -78,3 +78,4 @@ If the issue already has any `state:*` label (other than `state:blocked`), stop 
 After executing the full protocol, dispatch `backlog-discoverer-reviewer` with:
 - `issue_number`: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 - `story_type`: (as detected in Phase 3 — `functional` or `technical`)
+- `working_branch`: (as computed in Phase 6 — `sdlc/{issue_number}-{slug}`)

@@ -207,6 +207,7 @@ jobs:
           GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
           GH_AW_GITHUB_EVENT_INPUTS_ITERATION: ${{ github.event.inputs.iteration }}
           GH_AW_GITHUB_EVENT_INPUTS_STORY_TYPE: ${{ github.event.inputs.story_type }}
+          GH_AW_GITHUB_EVENT_INPUTS_WORKING_BRANCH: ${{ github.event.inputs.working_branch }}
           GH_AW_GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
@@ -282,6 +283,7 @@ jobs:
           GH_AW_GITHUB_EVENT_INPUTS_ITERATION: ${{ github.event.inputs.iteration }}
           GH_AW_EXPR_0A95899B: ${{ github.event.inputs.pr_number || 'none (first attempt)' }}
           GH_AW_GITHUB_EVENT_INPUTS_STORY_TYPE: ${{ github.event.inputs.story_type }}
+          GH_AW_GITHUB_EVENT_INPUTS_WORKING_BRANCH: ${{ github.event.inputs.working_branch }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           script: |
@@ -300,6 +302,7 @@ jobs:
           GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
           GH_AW_GITHUB_EVENT_INPUTS_ITERATION: ${{ github.event.inputs.iteration }}
           GH_AW_GITHUB_EVENT_INPUTS_STORY_TYPE: ${{ github.event.inputs.story_type }}
+          GH_AW_GITHUB_EVENT_INPUTS_WORKING_BRANCH: ${{ github.event.inputs.working_branch }}
           GH_AW_GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
@@ -324,6 +327,7 @@ jobs:
                 GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER: process.env.GH_AW_GITHUB_EVENT_INPUTS_ISSUE_NUMBER,
                 GH_AW_GITHUB_EVENT_INPUTS_ITERATION: process.env.GH_AW_GITHUB_EVENT_INPUTS_ITERATION,
                 GH_AW_GITHUB_EVENT_INPUTS_STORY_TYPE: process.env.GH_AW_GITHUB_EVENT_INPUTS_STORY_TYPE,
+                GH_AW_GITHUB_EVENT_INPUTS_WORKING_BRANCH: process.env.GH_AW_GITHUB_EVENT_INPUTS_WORKING_BRANCH,
                 GH_AW_GITHUB_EVENT_ISSUE_NUMBER: process.env.GH_AW_GITHUB_EVENT_ISSUE_NUMBER,
                 GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER: process.env.GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER,
                 GH_AW_GITHUB_REPOSITORY: process.env.GH_AW_GITHUB_REPOSITORY,
@@ -535,11 +539,16 @@ jobs:
                         "default": "functional",
                         "description": "functional or technical (propagated from discoverer).",
                         "type": "string"
+                      },
+                      "working_branch": {
+                        "description": "Branch sdlc/{N}-{slug} for this issue.",
+                        "type": "string"
                       }
                     },
                     "required": [
                       "issue_number",
-                      "pr_number"
+                      "pr_number",
+                      "working_branch"
                     ],
                     "type": "object"
                   },

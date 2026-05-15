@@ -81,3 +81,4 @@ safe-outputs:
 After executing the full protocol, dispatch `backlog-planner-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
+- `working_branch`: ${{ github.event.inputs.working_branch }}

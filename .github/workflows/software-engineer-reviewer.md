@@ -94,7 +94,7 @@ After rendering your verdict:
 | Verdict | Action |
 |---------|--------|
 | **APPROVED** | Submit `APPROVE` review → add `state:done` → remove `state:review-needed` |
-| **KICKBACK** | Submit `REQUEST_CHANGES` → dispatch `software-engineer` with `iteration+1` |
+| **KICKBACK** | Submit `REQUEST_CHANGES` → dispatch `software-engineer` with `iteration+1` + `working_branch` |
 | **BLOCKED** | Submit `COMMENT` → add `state:blocked` → do NOT dispatch |
 
 Max iterations: if `${{ github.event.inputs.iteration }}` > 3, add `state:blocked` and stop.

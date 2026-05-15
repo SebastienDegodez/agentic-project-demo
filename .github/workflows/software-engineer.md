@@ -105,5 +105,5 @@ safe-outputs:
 After executing the full protocol, dispatch `software-engineer-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
-- `pr_number`: (the PR you created or updated)
 - `iteration`: ${{ github.event.inputs.iteration }}
+- `working_branch`: ${{ github.event.inputs.working_branch }}

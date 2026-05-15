@@ -92,3 +92,4 @@ After executing the full protocol, dispatch `acceptance-designer-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
 - `iteration`: ${{ github.event.inputs.iteration }}
+- `working_branch`: ${{ github.event.inputs.working_branch }}

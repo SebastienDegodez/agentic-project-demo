@@ -73,6 +73,6 @@ After rendering your structured verdict:
 
 | Verdict | Action |
 |---------|--------|
-| **APPROVED** | Dispatch `solution-architect` with `issue_number` + `story_type` |
-| **RETRY** (minor issues) | Dispatch `backlog-planner` with `issue_number` + `story_type` |
+| **APPROVED** | Dispatch `solution-architect` with `issue_number` + `story_type` + `working_branch` |
+| **RETRY** (minor issues) | Dispatch `backlog-planner` with `issue_number` + `story_type` + `working_branch` |
 | **BLOCKED** (major blocker) | Add `state:blocked`. Do NOT dispatch. |
