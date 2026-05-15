@@ -148,16 +148,25 @@ For each issue in the raw list:
 
 ### Phase 6: PERSIST
 
-Write two files to `.skraft/sdlc/discover/`:
+1. **Construire le nom de branche** à partir du titre de l'issue GitHub :
+   - Récupérer le titre de l'issue via l'API GitHub (`mcp_github_issue_read` ou tool disponible)
+   - Slugifier le titre : lowercase, remplacer tout caractère non-alphanumérique par `-`, tronquer à 50 caractères, supprimer les tirets en début/fin
+   - `working_branch` = `sdlc/{issue_number}-{slug}`
+   - Exemple : issue #42 "Add eligibility check for young drivers" → `sdlc/42-add-eligibility-check-for-young-drivers`
 
-1. **`triage-{YYYY-MM-DD}.md`** — full triage report (discovery mode, raw counts, triage table, duplicates, sprint proposal)
-2. **`sprint-proposal.md`** — standalone sprint proposal (latest run overwrites previous)
+2. **Écrire deux fichiers** dans `.skraft/sdlc/discover/` (chemin relatif depuis la racine du repo, pas de préfixe `/tmp/`) :
+   - **`triage-{YYYY-MM-DD}.md`** — rapport de triage complet
+   - **`sprint-proposal.md`** — proposition de sprint (écrase la précédente)
 
-Both files must include:
-- Discovery mode used
-- Query string(s) executed
-- Total issues found / triaged
-- Timestamp
+3. Les deux fichiers doivent inclure :
+   - Discovery mode utilisé
+   - Query string(s) exécutée(s)
+   - Total issues trouvés / triagés
+   - Timestamp
+   - `working_branch` calculé (pour traçabilité)
+
+4. **Passer `working_branch`** dans le `dispatch_workflow` vers `backlog-discoverer-reviewer` :
+   - Le tool call `dispatch_workflow` doit inclure `working_branch: {valeur calculée}` dans ses paramètres d'input.
 
 ---
 
