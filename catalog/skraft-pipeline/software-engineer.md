@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: ""
+      working_branch:
+        description: Branch sdlc/{N}-{slug} for this issue.
+        required: true
+        type: string
 
 concurrency:
   group: skraft-issue-${{ github.event.inputs.issue_number }}
@@ -47,6 +51,7 @@ network:
     - java
 
 checkout:
+  ref: ${{ github.event.inputs.working_branch }}
   fetch-depth: 0
 
 imports:
@@ -71,6 +76,10 @@ safe-outputs:
     target: "*"
     title-prefix: "[skraft] "
     max: 1
+    protected-files:
+      policy: blocked
+      exclude:
+        - .skraft/
   add-labels:
     allowed: [state:review-needed, state:blocked]
     max: 2
@@ -96,5 +105,5 @@ safe-outputs:
 After executing the full protocol, dispatch `software-engineer-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
-- `pr_number`: (the PR you created or updated)
 - `iteration`: ${{ github.event.inputs.iteration }}
+- `working_branch`: ${{ github.event.inputs.working_branch }}

@@ -16,6 +16,10 @@ on:
         required: false
         type: string
         default: "functional"
+      working_branch:
+        description: Branch sdlc/{N}-{slug} created by backlog-discoverer.
+        required: true
+        type: string
 
 concurrency:
   group: skraft-issue-${{ github.event.inputs.issue_number }}
@@ -24,6 +28,10 @@ concurrency:
 timeout-minutes: 10
 
 permissions: read-all
+
+checkout:
+  ref: ${{ github.event.inputs.working_branch }}
+  fetch-depth: 0
 
 network:
   allowed:
@@ -65,6 +73,6 @@ After rendering your structured verdict:
 
 | Verdict | Action |
 |---------|--------|
-| **APPROVED** | Dispatch `backlog-planner` with `issue_number` + `story_type` |
-| **RETRY** (minor issues) | Dispatch `backlog-discoverer` with `issue_number` |
+| **APPROVED** | Dispatch `backlog-planner` with `issue_number` + `story_type` + `working_branch` |
+| **RETRY** (minor issues) | Dispatch `backlog-discoverer` with `issue_number` + `working_branch` |
 | **BLOCKED** (major blocker) | Add `state:blocked`. Do NOT dispatch. |

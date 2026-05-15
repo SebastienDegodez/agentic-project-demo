@@ -18,6 +18,10 @@ on:
         required: false
         type: string
         default: "functional"
+      working_branch:
+        description: Branch sdlc/{N}-{slug} for this issue.
+        required: true
+        type: string
 
 concurrency:
   group: skraft-issue-${{ github.event.inputs.issue_number }}
@@ -26,6 +30,10 @@ concurrency:
 timeout-minutes: 10
 
 permissions: read-all
+
+checkout:
+  ref: ${{ github.event.inputs.working_branch }}
+  fetch-depth: 0
 
 network:
   allowed:
@@ -54,6 +62,11 @@ safe-outputs:
   dispatch-workflow:
     workflows: [backlog-planner-reviewer]
     max: 1
+  push-to-pull-request-branch:
+    protected-files:
+      policy: blocked
+      exclude:
+        - .skraft/
 ---
 
 # Backlog-Planner Agent
@@ -68,3 +81,4 @@ safe-outputs:
 After executing the full protocol, dispatch `backlog-planner-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
+- `working_branch`: ${{ github.event.inputs.working_branch }}
