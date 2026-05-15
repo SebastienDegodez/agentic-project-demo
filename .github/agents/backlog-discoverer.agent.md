@@ -148,25 +148,25 @@ For each issue in the raw list:
 
 ### Phase 6: PERSIST
 
-1. **Construire le nom de branche** à partir du titre de l'issue GitHub :
-   - Récupérer le titre de l'issue via l'API GitHub (`mcp_github_issue_read` ou tool disponible)
-   - Slugifier le titre : lowercase, remplacer tout caractère non-alphanumérique par `-`, tronquer à 50 caractères, supprimer les tirets en début/fin
+1. **Build the branch name** from the GitHub issue title:
+   - Fetch the issue title via the GitHub API
+   - Slugify: lowercase, replace every non-alphanumeric character with `-`, truncate to 50 characters, trim leading/trailing hyphens
    - `working_branch` = `sdlc/{issue_number}-{slug}`
-   - Exemple : issue #42 "Add eligibility check for young drivers" → `sdlc/42-add-eligibility-check-for-young-drivers`
+   - Example: issue #42 "Add eligibility check for young drivers" → `sdlc/42-add-eligibility-check-for-young-drivers`
 
-2. **Écrire deux fichiers** dans `.skraft/sdlc/discover/` (chemin relatif depuis la racine du repo, pas de préfixe `/tmp/`) :
-   - **`triage-{YYYY-MM-DD}.md`** — rapport de triage complet
-   - **`sprint-proposal.md`** — proposition de sprint (écrase la précédente)
+2. **Write two files** to `.skraft/sdlc/discover/` (repo-relative path, no `/tmp/` prefix):
+   - **`triage-{YYYY-MM-DD}.md`** — full triage report
+   - **`sprint-proposal.md`** — sprint proposal (overwrites previous run)
 
-3. Les deux fichiers doivent inclure :
-   - Discovery mode utilisé
-   - Query string(s) exécutée(s)
-   - Total issues trouvés / triagés
+3. Both files must include:
+   - Discovery mode used
+   - Query string(s) executed
+   - Total issues found / triaged
    - Timestamp
-   - `working_branch` calculé (pour traçabilité)
+   - Computed `working_branch` (for traceability)
 
-4. **Passer `working_branch`** dans le `dispatch_workflow` vers `backlog-discoverer-reviewer` :
-   - Le tool call `dispatch_workflow` doit inclure `working_branch: {valeur calculée}` dans ses paramètres d'input.
+4. **Pass `working_branch`** in the `dispatch_workflow` to `backlog-discoverer-reviewer`:
+   - The `dispatch_workflow` tool call must include `working_branch: {computed value}` in its input parameters.
 
 ---
 
