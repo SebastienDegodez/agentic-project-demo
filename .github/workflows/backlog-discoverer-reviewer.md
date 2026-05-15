@@ -16,6 +16,10 @@ on:
         required: false
         type: string
         default: "functional"
+      working_branch:
+        description: Branch sdlc/{N}-{slug} created by backlog-discoverer.
+        required: true
+        type: string
 
 concurrency:
   group: skraft-issue-${{ github.event.inputs.issue_number }}
@@ -24,6 +28,10 @@ concurrency:
 timeout-minutes: 10
 
 permissions: read-all
+
+checkout:
+  ref: ${{ github.event.inputs.working_branch }}
+  fetch-depth: 0
 
 network:
   allowed:
