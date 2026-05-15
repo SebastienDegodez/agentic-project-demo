@@ -1,9 +1,15 @@
 # skraft-pipeline
 
-A six-workflow SDLC pipeline: **Discover → Discuss → Design → Distill → Deliver → Review**.  
+An **eleven-workflow SDLC pipeline** with automated reviewers at each phase:
+**Discover → Discuss → Design → Distill → Deliver**, each with a dedicated reviewer
+that approves or kicks back before the next phase starts.
+
 Each role is a separate gh-aw workflow. They coordinate by **dispatching the next workflow** via
 gh-aw's `dispatch-workflow` safe-output, passing typed inputs (issue number, story type,
 iteration counter, optional PR number).
+
+An optional **orchestrator** (`skraft-orchestrator`) can kick off or resume the pipeline at any
+phase via slash command (`/sdlc`) or `workflow_dispatch`.
 
 > **Status**: active — workflows are compiled and deployed in `.github/workflows/`.  
 > VS Code interactive agents mirror the same pipeline in `.github/agents/`.
@@ -44,36 +50,57 @@ SDLC traceability:
 
 ```
    label: sdlc  (the only label a human adds to a fresh issue)
-          │
+          │                            OR  /sdlc slash-command
+          ▼                            OR  gh aw run skraft-orchestrator
+   ┌─────────────────────┐   detects story_type from type labels:
+   │ backlog-discoverer  │   type/tech-debt|infra|refactoring → technical
+   └─────────────────────┘   other → functional
+          │ dispatch (issue_number, story_type)
           ▼
-   ┌─────────────────────┐   dispatch (issue_number, story_type)
-   │ backlog-discoverer  │──────────────────────────────────────────────────┐
-   │                     │   detects story_type from type labels:           │
-   │                     │   type/tech-debt|infra|refactoring → technical   │
-   └─────────────────────┘   other → functional                            │
-                                                                            ▼
-   ┌──────────────────┐   dispatch (issue_number, story_type)
-   │ backlog-planner  │──────────────────────────────────────────────────┐
-   └──────────────────┘                                                  │
-                                                                         ▼
-   ┌─────────────────────┐   dispatch (issue_number, story_type)
-   │ solution-architect  │────────────────────────────────────────────┐
-   └─────────────────────┘                                            │
-                                                                      ▼
-   ┌──────────────────────┐   dispatch (issue_number, story_type, iteration=1)
-   │ acceptance-designer  │──────────────────────────────────────────────────┐
-   │                      │   functional → Gherkin + test-plan + impl-plan   │
-   │                      │   technical  → impl-plan only (no .feature file) │
-   └──────────────────────┘                                                  │
-                                                                             ▼
-   ┌──────────────────────┐   dispatch (issue_number, story_type, iteration, pr_number?)
-   │  software-engineer   │────────────────────────────────────────────────────────────┐
-   └──────────────────────┘                                                            │
-                                                                                       ▼
+   ┌──────────────────────────────┐
+   │ backlog-discoverer-reviewer  │  approve → next phase
+   └──────────────────────────────┘  reject  → re-dispatch backlog-discoverer
+          │ dispatch (issue_number, story_type)
+          ▼
+   ┌──────────────────┐
+   │ backlog-planner  │
+   └──────────────────┘
+          │ dispatch (issue_number, story_type)
+          ▼
+   ┌─────────────────────────────┐
+   │ backlog-planner-reviewer    │  approve → next phase
+   └─────────────────────────────┘  reject  → re-dispatch backlog-planner
+          │ dispatch (issue_number, story_type)
+          ▼
+   ┌─────────────────────┐
+   │ solution-architect  │
+   └─────────────────────┘
+          │ dispatch (issue_number, story_type)
+          ▼
+   ┌──────────────────────────────────┐
+   │ solution-architect-reviewer      │  approve → next phase
+   └──────────────────────────────────┘  reject  → re-dispatch solution-architect
+          │ dispatch (issue_number, story_type, iteration=1)
+          ▼
+   ┌──────────────────────┐   functional → Gherkin + test-plan + impl-plan
+   │ acceptance-designer  │   technical  → impl-plan only (no .feature file)
+   └──────────────────────┘
+          │ dispatch (issue_number, story_type, iteration)
+          ▼
+   ┌──────────────────────────────────┐
+   │ acceptance-designer-reviewer     │  approve → next phase
+   └──────────────────────────────────┘  reject  → re-dispatch acceptance-designer
+          │ dispatch (issue_number, story_type, iteration, pr_number?)
+          ▼
+   ┌──────────────────────┐
+   │  software-engineer   │
+   └──────────────────────┘
+          │ dispatch (pr_number, issue_number, story_type, iteration)
+          ▼
    ┌──────────────────────────┐  approve  ► state:done    (human merges the PR)
    │ software-engineer-       │  block    ► state:blocked  (human resolves)
-   │   reviewer               │  kickback ► dispatch software-engineer (
-   └──────────────────────────┘            issue_number, story_type, pr_number, iteration+1)
+   │   reviewer               │  kickback ► dispatch software-engineer
+   └──────────────────────────┘            (issue_number, story_type, pr_number, iteration+1)
 ```
 
 `state:*` labels (`plan-needed`, `impl-needed`, `review-needed`, `done`, `blocked`) are
@@ -116,12 +143,17 @@ Each section carries the `iteration` counter at the time it was produced. When a
 
 | File | Trigger | Dispatches next |
 |------|---------|-----------------|
-| `backlog-discoverer.md` | `issues.labeled` with `sdlc` | `backlog-planner` (issue_number, **story_type**) |
-| `backlog-planner.md` | `workflow_dispatch` (issue_number, story_type) | `solution-architect` (issue_number, **story_type**) |
-| `solution-architect.md` | `workflow_dispatch` (issue_number, story_type) | `acceptance-designer` (issue_number, **story_type**, iteration=1) |
-| `acceptance-designer.md` | `workflow_dispatch` (issue_number, story_type, iteration) | `software-engineer` (issue_number, **story_type**, iteration) |
-| `software-engineer.md` | `workflow_dispatch` (issue_number, story_type, iteration, pr_number?) | `software-engineer-reviewer` (issue_number, **story_type**, pr_number, iteration) |
+| `backlog-discoverer.md` | `issues.labeled: sdlc` + `workflow_dispatch` | `backlog-discoverer-reviewer` (issue_number, **story_type**) |
+| `backlog-discoverer-reviewer.md` | `workflow_dispatch` (issue_number, story_type) | `backlog-planner` on approve / `backlog-discoverer` on reject |
+| `backlog-planner.md` | `workflow_dispatch` (issue_number, story_type) | `backlog-planner-reviewer` (issue_number, **story_type**) |
+| `backlog-planner-reviewer.md` | `workflow_dispatch` (issue_number, story_type) | `solution-architect` on approve / `backlog-planner` on reject |
+| `solution-architect.md` | `workflow_dispatch` (issue_number, story_type) | `solution-architect-reviewer` (issue_number, **story_type**) |
+| `solution-architect-reviewer.md` | `workflow_dispatch` (issue_number, story_type) | `acceptance-designer` on approve / `solution-architect` on reject |
+| `acceptance-designer.md` | `workflow_dispatch` (issue_number, story_type, iteration) | `acceptance-designer-reviewer` (issue_number, **story_type**, iteration) |
+| `acceptance-designer-reviewer.md` | `workflow_dispatch` (issue_number, story_type, iteration) | `software-engineer` on approve / `acceptance-designer` on reject |
+| `software-engineer.md` | `workflow_dispatch` (issue_number, story_type, iteration, pr_number?) | `software-engineer-reviewer` (pr_number, issue_number, **story_type**, iteration) |
 | `software-engineer-reviewer.md` | `workflow_dispatch` (pr_number, issue_number, story_type, iteration) | `software-engineer` on kickback (iteration+1), else nothing |
+| `skraft-orchestrator.md` | `workflow_dispatch` (issue_number, story_type, phase) + `/sdlc` | Any of the 10 above, based on current issue state |
 
 VS Code interactive agents with identical logic live in [`.github/agents/`](../../.github/agents/).
 
@@ -129,35 +161,32 @@ VS Code interactive agents with identical logic live in [`.github/agents/`](../.
 
 ## Install
 
-The workflows are already compiled and deployed in `.github/workflows/`. To install into a
-**fresh target repo**, copy the six `.md` files and recompile:
+To install into a **fresh target repo**, use `gh aw add` depuis le catalogue. Les workflows
+obtiendront automatiquement un champ `source:` qui permet les mises à jour futures via
+`gh aw update`.
 
 ```bash
-for f in backlog-discoverer backlog-planner solution-architect \
-          acceptance-designer software-engineer software-engineer-reviewer; do
-  cp catalog/skraft-pipeline/$f.md .github/workflows/
-  gh aw compile $f
+for f in backlog-discoverer backlog-discoverer-reviewer \
+          backlog-planner backlog-planner-reviewer \
+          solution-architect solution-architect-reviewer \
+          acceptance-designer acceptance-designer-reviewer \
+          software-engineer software-engineer-reviewer \
+          skraft-orchestrator; do
+  gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/$f.md@main
 done
 ```
 
-Then create the labels (see Prerequisites below) and set the `COPILOT_GITHUB_TOKEN` secret:
+Pour mettre à jour les workflows installés vers la dernière version du catalogue :
+
+```bash
+gh aw update
+```
+
+Ensuite créer les labels (voir Prérequis ci-dessous) et définir le secret `COPILOT_GITHUB_TOKEN` :
 
 ```bash
 gh aw secrets set COPILOT_GITHUB_TOKEN --value "<your-pat>"
 ```
-
-<details>
-<summary>Install from catalog via <code>gh aw add</code> (advanced)</summary>
-
-```bash
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/backlog-discoverer.md@main
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/backlog-planner.md@main
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/solution-architect.md@main
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/acceptance-designer.md@main
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/software-engineer.md@main
-gh aw add SebastienDegodez/agentic-project-demo/catalog/skraft-pipeline/software-engineer-reviewer.md@main
-```
-</details>
 
 ---
 
@@ -236,8 +265,13 @@ gh label create "type/refactoring"     --color e4e669
 | Agent | Phase | Skill(s) | Output |
 |-------|-------|----------|--------|
 | `backlog-discoverer` | DISCOVER | `issue-triage`, `github-search-protocol` | Triage report + sprint proposal + **story_type** |
+| `backlog-discoverer-reviewer` | DISCOVER review | `discovery-review-criteria` | Verdict: approve → DISCUSS / reject → redo |
 | `backlog-planner` | DISCUSS | `issue-refinement`, `sprint-planning` | Refined stories + AC drafts |
+| `backlog-planner-reviewer` | DISCUSS review | `planning-review-criteria` | Verdict: approve → DESIGN / reject → redo |
 | `solution-architect` | DESIGN | `architecture-patterns`, `architecture-decisions` | ADRs + event models + contracts |
+| `solution-architect-reviewer` | DESIGN review | `architecture-review-criteria` | Verdict: approve → DISTILL / reject → redo |
 | `acceptance-designer` | DISTILL | `bdd-methodology`, `test-design-mandates` | **functional**: Gherkin + test-plan + impl-plan / **technical**: impl-plan only |
+| `acceptance-designer-reviewer` | DISTILL review | `acceptance-review-criteria` | Verdict: approve → DELIVER / reject → redo |
 | `software-engineer` | DELIVER | `outside-in-tdd`, `clean-architecture-testing` | Code + tests via Outside-In TDD |
-| `software-engineer-reviewer` | DELIVER | `craft-discipline`, `mutation-testing` | Review verdict (approve / kickback / block) |
+| `software-engineer-reviewer` | DELIVER review | `craft-discipline`, `mutation-testing` | Verdict: approve (state:done) / kickback / block |
+| `skraft-orchestrator` | ALL | *(routes to correct phase)* | Resumes pipeline from any phase via labels or explicit phase input |
