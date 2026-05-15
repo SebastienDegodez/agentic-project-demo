@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: "1"
+      working_branch:
+        description: Branch sdlc/{N}-{slug} for this issue.
+        required: true
+        type: string
 
 concurrency:
   group: skraft-issue-${{ github.event.inputs.issue_number }}
@@ -29,6 +33,10 @@ concurrency:
 timeout-minutes: 10
 
 permissions: read-all
+
+checkout:
+  ref: ${{ github.event.inputs.working_branch }}
+  fetch-depth: 0
 
 network:
   allowed:
