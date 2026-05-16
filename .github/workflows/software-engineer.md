@@ -102,8 +102,11 @@ safe-outputs:
 - Existing PR: ${{ github.event.inputs.pr_number || 'none (first attempt)' }}
 - Repository: `${{ github.repository }}`
 
+**Before pushing code**, look up the open PR for branch `${{ github.event.inputs.working_branch }}` using the GitHub API, and use that PR number when calling `push_to_pull_request_branch`.
+
 After executing the full protocol, dispatch `software-engineer-reviewer` with:
 - `issue_number`: ${{ github.event.inputs.issue_number }}
 - `story_type`: ${{ github.event.inputs.story_type }}
+- `pr_number`: (the PR you created or updated)
 - `iteration`: ${{ github.event.inputs.iteration }}
 - `working_branch`: ${{ github.event.inputs.working_branch }}
